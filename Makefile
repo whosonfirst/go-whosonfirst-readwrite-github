@@ -18,6 +18,7 @@ build:	fmt bin
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-readwrite/..."
+	@GOPATH=$(shell pwd) go get -u "github.com/google/go-github/..."
 
 vendor-deps: rmdeps deps
 	if test ! -d vendor; then mkdir vendor; fi
