@@ -23,7 +23,7 @@ type GitHubReader struct {
 func NewGitHubReader(repo string, branch string) (wof_reader.Reader, error) {
 
 	// https://github.com/golang/go/wiki/RateLimiting
-	
+
 	rate := time.Second / 3
 	throttle := time.Tick(rate)
 

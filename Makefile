@@ -34,3 +34,4 @@ fmt:
 
 bin: 	self
 	GOPATH=$(GOPATH) go build -o bin/wof-github-copy cmd/wof-github-copy.go
+	GOPATH=$(GOPATH) go build -o bin/api-reader cmd/api-reader.go
