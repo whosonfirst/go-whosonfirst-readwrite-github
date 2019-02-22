@@ -54,7 +54,7 @@ func (r *GitHubAPIReader) Read(key string) (io.ReadCloser, error) {
 	<-r.throttle
 
 	url := r.URI(key)
-	
+
 	opts := &github.RepositoryContentGetOptions{}
 
 	rsp, _, _, err := r.client.Repositories.GetContents(r.context, r.owner, r.repo, url, opts)
