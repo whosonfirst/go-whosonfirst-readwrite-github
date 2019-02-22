@@ -19,6 +19,7 @@ type GitHubAPIWriter struct {
 	branch   string
 	client   *github.Client
 	context  context.Context
+	user     *github.User
 	throttle <-chan time.Time
 }
 
@@ -31,6 +32,13 @@ func NewGitHubAPIWriter(ctx context.Context, owner string, repo string, branch s
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
+	users := client.Users
+	user, _, err := users.Get(ctx, "")
+
+	if err != nil {
+		return nil, err
+	}
+
 	// https://github.com/golang/go/wiki/RateLimiting
 
 	rate := time.Second / 3
@@ -42,6 +50,7 @@ func NewGitHubAPIWriter(ctx context.Context, owner string, repo string, branch s
 		branch:   branch,
 		throttle: throttle,
 		client:   client,
+		user:     user,
 		context:  ctx,
 	}
 
@@ -60,9 +69,9 @@ func (r *GitHubAPIWriter) Write(path string, fh io.ReadCloser) error {
 
 	url := r.URI(path)
 
-	commit_msg := ""
-	name := ""
-	email := ""
+	commit_msg := fmt.Sprintf("Update %s", url)
+	name := *r.user.Name
+	email := *r.user.Email
 
 	update_opts := &github.RepositoryContentFileOptions{
 		Message: github.String(commit_msg),
@@ -79,6 +88,7 @@ func (r *GitHubAPIWriter) Write(path string, fh io.ReadCloser) error {
 	get_rsp, _, _, err := r.client.Repositories.GetContents(r.context, r.owner, r.repo, url, get_opts)
 
 	if err != nil {
+		update_opts.Message = github.String("Initial commit")
 		update_opts.SHA = get_rsp.SHA
 	}
 
