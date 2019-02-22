@@ -12,18 +12,24 @@ import (
 	"time"
 )
 
-type GitHubAPIWriter struct {
-	wof_writer.Writer
-	owner    string
-	repo     string
-	branch   string
-	client   *github.Client
-	context  context.Context
-	user     *github.User
-	throttle <-chan time.Time
+type GitHubAPIWriterCommitTemplates struct {
+	New string
+	Update string
 }
 
-func NewGitHubAPIWriter(ctx context.Context, owner string, repo string, branch string, token string) (wof_writer.Writer, error) {
+type GitHubAPIWriter struct {
+	wof_writer.Writer
+	owner                string
+	repo                 string
+	branch               string
+	client               *github.Client
+	context              context.Context
+	user                 *github.User
+	throttle             <-chan time.Time
+	templates *GitHubAPIWriterCommitTemplates
+}
+
+func NewGitHubAPIWriter(ctx context.Context, owner string, repo string, branch string, token string, templates *GitHubAPIWriterCommitTemplates) (wof_writer.Writer, error) {
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -38,20 +44,21 @@ func NewGitHubAPIWriter(ctx context.Context, owner string, repo string, branch s
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// https://github.com/golang/go/wiki/RateLimiting
 
 	rate := time.Second / 3
 	throttle := time.Tick(rate)
 
 	r := GitHubAPIWriter{
-		repo:     repo,
-		owner:    owner,
-		branch:   branch,
-		throttle: throttle,
-		client:   client,
-		user:     user,
-		context:  ctx,
+		repo:                 repo,
+		owner:                owner,
+		branch:               branch,
+		throttle:             throttle,
+		client:               client,
+		user:                 user,
+		templates: templates,
+		context:              ctx,
 	}
 
 	return &r, nil
@@ -69,9 +76,9 @@ func (r *GitHubAPIWriter) Write(path string, fh io.ReadCloser) error {
 
 	url := r.URI(path)
 
-	commit_msg := fmt.Sprintf("Update %s", url)
-	name := *r.user.Name
-	email := *r.user.Email
+	commit_msg := fmt.Sprintf(r.templates.New, url)
+	name := *r.user.Login
+	email := fmt.Sprintf("%s@localhost", name)
 
 	update_opts := &github.RepositoryContentFileOptions{
 		Message: github.String(commit_msg),
@@ -87,15 +94,16 @@ func (r *GitHubAPIWriter) Write(path string, fh io.ReadCloser) error {
 
 	get_rsp, _, _, err := r.client.Repositories.GetContents(r.context, r.owner, r.repo, url, get_opts)
 
-	if err != nil {
-		update_opts.Message = github.String("Initial commit")
+	if err == nil {
+		commit_msg = fmt.Sprintf(r.templates.Update, url)
+		update_opts.Message = github.String(commit_msg)
 		update_opts.SHA = get_rsp.SHA
 	}
 
-	_, _, err = r.client.Repositories.UpdateFile(r.context, r.owner, r.owner, url, update_opts)
+	_, _, err = r.client.Repositories.UpdateFile(r.context, r.owner, r.repo, url, update_opts)
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return nil
