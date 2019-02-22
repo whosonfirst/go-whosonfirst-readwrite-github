@@ -26,8 +26,8 @@ import (
 	"time"
 )
 
-// really this should function be part of the go-whosonfirst-export package
-// but this will do for the purpose of an example...
+// really this function should be part of the go-whosonfirst-export package
+// but for the purposes of example code it will do...
 
 func deprecate(fh io.ReadCloser) (io.ReadCloser, error) {
 
