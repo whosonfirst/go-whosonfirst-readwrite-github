@@ -9,6 +9,7 @@ self:   prep rmdeps
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-readwrite-github
 	cp -r reader src/github.com/whosonfirst/go-whosonfirst-readwrite-github/
 	cp -r writer src/github.com/whosonfirst/go-whosonfirst-readwrite-github/
+	cp *.go src/github.com/whosonfirst/go-whosonfirst-readwrite-github/
 	cp -r vendor/* src/
 
 rmdeps:
@@ -33,5 +34,4 @@ fmt:
 	go fmt writer/*.go
 
 bin: 	self
-	GOPATH=$(GOPATH) go build -o bin/wof-github-copy cmd/wof-github-copy.go
 	GOPATH=$(GOPATH) go build -o bin/api-reader cmd/api-reader.go
