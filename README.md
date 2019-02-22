@@ -26,6 +26,9 @@ import (
 	"time"
 )
 
+// really this should function be part of the go-whosonfirst-export package
+// but this will do for the purpose of an example...
+
 func deprecate(fh io.ReadCloser) (io.ReadCloser, error) {
 
 	body, err := ioutil.ReadAll(fh)
@@ -43,6 +46,12 @@ func deprecate(fh io.ReadCloser) (io.ReadCloser, error) {
 	}
 
 	body, err = sjson.SetBytes(body, "properties.mz:is_current", "0")
+
+	if err != nil {
+		return nil, err
+	}
+
+	body, err = sjson.SetBytes(body, "wof:lastmodified", now.Unix())
 
 	if err != nil {
 		return nil, err
