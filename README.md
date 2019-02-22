@@ -1,8 +1,14 @@
 # go-whosonfirst-readwrite-github
 
+## Important
+
+This is work in progress and should be considered to work "until it doesn't". Things may change still.
+
 ## Example
 
-### Deprecating one or more Who's On First records
+### Deprecating one or more Who's On First records (using the GitHub API)
+
+_Note the use of the `github.com/tidwall/sjson` package which is not part of this package._
 
 ```
 package main
@@ -104,3 +110,4 @@ func main() {
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-readwrite
+* https://github.com/google/go-github
