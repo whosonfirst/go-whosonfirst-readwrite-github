@@ -13,19 +13,19 @@ import (
 )
 
 type GitHubAPIWriterCommitTemplates struct {
-	New string
+	New    string
 	Update string
 }
 
 type GitHubAPIWriter struct {
 	wof_writer.Writer
-	owner                string
-	repo                 string
-	branch               string
-	client               *github.Client
-	context              context.Context
-	user                 *github.User
-	throttle             <-chan time.Time
+	owner     string
+	repo      string
+	branch    string
+	client    *github.Client
+	context   context.Context
+	user      *github.User
+	throttle  <-chan time.Time
 	templates *GitHubAPIWriterCommitTemplates
 }
 
@@ -44,21 +44,21 @@ func NewGitHubAPIWriter(ctx context.Context, owner string, repo string, branch s
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// https://github.com/golang/go/wiki/RateLimiting
 
 	rate := time.Second / 3
 	throttle := time.Tick(rate)
 
 	r := GitHubAPIWriter{
-		repo:                 repo,
-		owner:                owner,
-		branch:               branch,
-		throttle:             throttle,
-		client:               client,
-		user:                 user,
+		repo:      repo,
+		owner:     owner,
+		branch:    branch,
+		throttle:  throttle,
+		client:    client,
+		user:      user,
 		templates: templates,
-		context:              ctx,
+		context:   ctx,
 	}
 
 	return &r, nil
